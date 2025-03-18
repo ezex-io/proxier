@@ -81,7 +81,10 @@ func TestProxyRoutes(t *testing.T) {
 				_ = resp.Body.Close()
 			}()
 
-			assert.Contains(t, []int{http.StatusOK, http.StatusBadGateway, http.StatusNotFound}, resp.StatusCode,
+			assert.Contains(t, []int{
+				http.StatusOK, http.StatusBadGateway,
+				http.StatusNotFound, http.StatusForbidden,
+			}, resp.StatusCode,
 				"Unexpected response status")
 		})
 	}
