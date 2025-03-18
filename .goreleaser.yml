@@ -1,8 +1,8 @@
 builds:
-  - id: fluora
-    main: ./cmd/fluora/main.go
+  - id: proxier
+    main: ./cmd/proxier/main.go
     dir: ./
-    binary: fluora
+    binary: proxier
     env:
       - CGO_ENABLED=0
     goos:
@@ -15,8 +15,8 @@ builds:
 
 archives:
   - builds:
-      - fluora
-    name_template: 'fluora_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+      - proxier
+    name_template: 'proxier_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     format_overrides:
       - goos: windows
         format: zip
@@ -24,9 +24,9 @@ archives:
       - LICENSE
 
 nfpms:
-  - license: CC0-1.0 License
-    maintainer: Javad Rajabzadeh <ja7ad@live.com>
-    homepage: https://fluora.javad.dev
+  - license: MIT License
+    maintainer: ezeX Team <info@ezex.io>
+    homepage: https://ezex.io
     bindir: /usr/local/bin
     description: A high-performance proxy that routes external endpoint requests to an origin server.  Let me know if you'd like to add more details, such as features, supported protocols, or use cases!
     formats:
@@ -34,7 +34,7 @@ nfpms:
       - rpm
 
 checksum:
-  name_template: 'fluora_checksums.txt'
+  name_template: 'proxier_checksums.txt'
 
 changelog:
   sort: asc
