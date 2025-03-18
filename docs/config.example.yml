@@ -1,0 +1,13 @@
+server:
+  host: "0.0.0.0"
+  listen_port: "8080"
+
+proxy:
+  - endpoint: /foo1
+    destination_url: "https://example.com/bar1"
+
+  - endpoint: /foo2
+    destination_url: "https://example.com/bar2"
+
+  - endpoint: /foo3
+    destination_url: "https://example.com/bar3"

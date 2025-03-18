@@ -1,0 +1,46 @@
+builds:
+  - id: fluora
+    main: ./cmd/fluora/main.go
+    dir: ./
+    binary: fluora
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - builds:
+      - fluora
+    name_template: 'fluora_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+
+nfpms:
+  - license: CC0-1.0 License
+    maintainer: Javad Rajabzadeh <ja7ad@live.com>
+    homepage: https://fluora.javad.dev
+    bindir: /usr/local/bin
+    description: A high-performance proxy that routes external endpoint requests to an origin server.  Let me know if you'd like to add more details, such as features, supported protocols, or use cases!
+    formats:
+      - deb
+      - rpm
+
+checksum:
+  name_template: 'fluora_checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - Merge pull request
+      - Merge branch
