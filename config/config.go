@@ -16,6 +16,7 @@ type Config struct {
 type ServerConfig struct {
 	Host       string `yaml:"host"`
 	ListenPort string `yaml:"listen_port"`
+	FastHTTP   bool   `yaml:"fast_http"`
 }
 
 type ProxyRule struct {

@@ -36,7 +36,7 @@ func main() {
 
 	log.Info("configuration loaded successfully")
 
-	srv, err := server.New(log, cfg.Server, cfg.Proxy)
+	srv, err := server.New(cfg, log)
 	if err != nil {
 		log.Error("Failed to initialize server", "error", err)
 		os.Exit(1)

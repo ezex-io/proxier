@@ -12,8 +12,8 @@ type Schema struct {
 }
 
 var Version = Schema{
-	Major: 1,
-	Minor: 0,
+	Major: 0,
+	Minor: 2,
 	Patch: 0,
 	Meta:  "",
 }
