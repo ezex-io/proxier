@@ -1,4 +1,4 @@
-package server_test
+package server
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/ezex-io/proxier/config"
-	"github.com/ezex-io/proxier/internal/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,17 +27,20 @@ var serverConfig = &config.ServerConfig{
 }
 
 func TestNewServer(t *testing.T) {
-	srv, err := server.New(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, serverConfig, proxyRules)
 
 	require.NoError(t, err, "Expected no error while creating server")
-	assert.NotNil(t, srv, "Server instance should not be nil")
+	assert.NotNil(t, srv, "httpServer instance should not be nil")
 }
 
 func TestRootEndpoint(t *testing.T) {
-	srv, err := server.New(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, serverConfig, proxyRules)
 	require.NoError(t, err)
 
-	testServer := httptest.NewServer(srv.HTTPHandler())
+	sv, ok := srv.(*httpServer)
+	require.True(t, ok)
+
+	testServer := httptest.NewServer(sv.httpServer.Handler)
 	defer testServer.Close()
 
 	resp, err := http.Get(fmt.Sprintf("%s/", testServer.URL))
@@ -51,10 +53,13 @@ func TestRootEndpoint(t *testing.T) {
 }
 
 func TestLivezEndpoint(t *testing.T) {
-	srv, err := server.New(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, serverConfig, proxyRules)
 	require.NoError(t, err)
 
-	testServer := httptest.NewServer(srv.HTTPHandler())
+	sv, ok := srv.(*httpServer)
+	require.True(t, ok)
+
+	testServer := httptest.NewServer(sv.httpServer.Handler)
 	defer testServer.Close()
 
 	resp, err := http.Get(fmt.Sprintf("%s/livez", testServer.URL))
@@ -67,10 +72,13 @@ func TestLivezEndpoint(t *testing.T) {
 }
 
 func TestProxyRoutes(t *testing.T) {
-	srv, err := server.New(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, serverConfig, proxyRules)
 	require.NoError(t, err)
 
-	testServer := httptest.NewServer(srv.HTTPHandler())
+	sv, ok := srv.(*httpServer)
+	require.True(t, ok)
+
+	testServer := httptest.NewServer(sv.httpServer.Handler)
 	defer testServer.Close()
 
 	for _, rule := range proxyRules {
@@ -91,7 +99,7 @@ func TestProxyRoutes(t *testing.T) {
 }
 
 func TestServerStartStop(t *testing.T) {
-	srv, err := server.New(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, serverConfig, proxyRules)
 	require.NoError(t, err)
 
 	go srv.Start()

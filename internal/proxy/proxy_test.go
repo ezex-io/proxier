@@ -14,7 +14,7 @@ func TestNewProxyHandler(t *testing.T) {
 	endpoint := "/test"
 	destination := "https://example.com"
 
-	_, handler, err := NewProxyHandler(endpoint, destination)
+	_, handler, err := HTTPHandler(endpoint, destination)
 
 	require.NoError(t, err, "Expected no error while creating proxy handler")
 	assert.NotNil(t, handler, "Proxy handler should not be nil")
@@ -24,7 +24,7 @@ func TestNewProxyHandler_InvalidURL(t *testing.T) {
 	endpoint := "/invalid"
 	destination := "://invalid-url"
 
-	_, _, err := NewProxyHandler(endpoint, destination)
+	_, _, err := HTTPHandler(endpoint, destination)
 
 	assert.Error(t, err, "Expected error for invalid URL")
 }
@@ -39,7 +39,7 @@ func TestProxyHandler(t *testing.T) {
 
 	endpoint := "/proxy"
 	destination := mockServer.URL
-	_, handler, err := NewProxyHandler(endpoint, destination)
+	_, handler, err := HTTPHandler(endpoint, destination)
 	require.NoError(t, err, "Proxy handler creation should not fail")
 
 	proxyServer := httptest.NewServer(handler)
@@ -58,7 +58,7 @@ func TestProxyHandler_Unreachable(t *testing.T) {
 	endpoint := "/proxy"
 	destination := "http://127.0.0.1:9999" // Unreachable port
 
-	_, handler, err := NewProxyHandler(endpoint, destination)
+	_, handler, err := HTTPHandler(endpoint, destination)
 	require.NoError(t, err, "Proxy handler creation should not fail")
 
 	proxyServer := httptest.NewServer(handler)
