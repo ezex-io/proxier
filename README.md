@@ -6,8 +6,7 @@ It is lightweight, configurable via `config.yaml`, and supports multiple endpoin
 ## 🚀 Features
 - 🌍 **Dynamic Proxy Routing** – Easily define multiple proxy rules in `config.yaml`
 - 🛠 **Simple Configuration** – No database required, just YAML-based settings
-- 🚀 **Fast & Efficient** – Uses `httputil.ReverseProxy` for optimized request forwarding
-- 🩺 **Health Check API** – Includes `/livez` for monitoring service health
+- 🚀 **Fast & Efficient** – Optimized request forwarding
 - 🏗 **Cross-Platform** – Works on Linux, macOS, and Windows
 
 ---
@@ -42,6 +41,7 @@ Define your proxy routes in a **YAML config file**:
 server:
   host: "0.0.0.0"
   listen_port: "8080"
+  fast_http: true
 
 proxy:
   - endpoint: /foo1
