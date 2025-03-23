@@ -4,11 +4,5 @@ server:
   fast_http: true
 
 proxy:
-  - endpoint: /foo1
-    destination_url: "https://example.com/bar1"
-
-  - endpoint: /foo2
-    destination_url: "https://example.com/bar2"
-
-  - endpoint: /foo3
-    destination_url: "https://example.com/bar3"
+  - endpoint: /foo
+    destination_url: https://httpbin.org/get

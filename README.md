@@ -22,8 +22,8 @@ go install github.com/ezex-io/proxier@latest
 
 ### **Using Docker**
 ```sh
-docker pull ezex-io/proxier:latest
-docker run -p 8080:8080 -v $(pwd)/config.yaml:/app/config.yaml ezex-io/proxier
+docker pull ezexio/proxier:latest
+docker run -p 8080:8080 -v $(pwd)/config.yaml:/etc/proxier/config.yaml ezexio/proxier
 ```
 
 ### **Build from Source**

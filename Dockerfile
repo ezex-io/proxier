@@ -1,18 +1,18 @@
-FROM golang:1.24 AS builder
+# Build stage
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
-
-COPY go.mod go.sum ./
-RUN go mod download
-
 COPY . .
 
+RUN go mod download -x
 RUN make build_linux
 
-FROM scratch
+FROM alpine:latest
 
-COPY --from=builder /app/build/proxier /proxier
+RUN mkdir /etc/proxier
+COPY --from=builder /app/build/proxier /usr/bin/proxier
+COPY --from=builder /app/docs/config.example.yml /etc/proxier/config.yml
 
 EXPOSE 8080
 
-ENTRYPOINT ["/proxier", "-config", "/config.yaml"]
+ENTRYPOINT ["/usr/bin/proxier", "-config", "/etc/proxier/config.yml"]
