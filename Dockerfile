@@ -1,6 +1,8 @@
 # Build stage
 FROM golang:1.24-alpine AS builder
 
+RUN apk --no-cache add make git
+
 WORKDIR /app
 COPY . .
 
