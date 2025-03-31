@@ -1,6 +1,6 @@
 # Proxier
 
-**Proxier** is a high-performance **reverse proxy** that routes external requests to predefined origin servers.  
+**Proxier** is a high-performance **reverse proxy** that routes external requests to predefined origin servers.
 It is lightweight, configurable via `config.yaml`, and supports multiple endpoints.
 
 ## 🚀 Features
