@@ -1,4 +1,4 @@
-name: Testing (Go)
+name: Lint and Format Check (Go)
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  testing:
+  linting:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,5 +22,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Tests
-        run: make test
+      - name: Installing golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+      - name: Formatting and linting the project
+        run: make check
