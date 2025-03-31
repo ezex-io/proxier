@@ -13,7 +13,6 @@ FROM alpine:latest
 
 RUN mkdir /etc/proxier
 COPY --from=builder /app/build/proxier /usr/bin/proxier
-COPY --from=builder /app/docs/config.example.yml /etc/proxier/config.yml
 
 EXPOSE 8080
 
