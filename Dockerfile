@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 
 RUN go mod download -x
-RUN make build_linux
+RUN make release
 
 FROM alpine:latest
 
