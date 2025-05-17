@@ -3,11 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"strings"
 	"time"
 
-	"github.com/ezex-io/proxier/config"
+	"github.com/ezex-io/gopkg/logger"
 	"github.com/ezex-io/proxier/internal/proxy"
 	"github.com/valyala/fasthttp"
 )
@@ -15,21 +14,21 @@ import (
 type fastHTTPServer struct {
 	sv     *fasthttp.Server
 	errCh  chan error
-	log    *slog.Logger
+	log    logger.Logger
 	addr   string
 	cancel context.CancelFunc
 }
 
-func newFastHTTP(log *slog.Logger, cfg *config.ServerConfig, proxyRules []*config.ProxyRule) (Server, error) {
+func newFastHTTP(log logger.Logger, address string, proxyRules map[string]string) (Server, error) {
 	handlers := make(map[string]fasthttp.RequestHandler)
 
-	for _, rule := range proxyRules {
-		endpoint, handler, err := proxy.FastHTTPHandler(rule.Endpoint, rule.DestinationURL)
+	for endpoint, destination := range proxyRules {
+		router, handler, err := proxy.FastHTTPHandler(endpoint, destination)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create fasthttp proxy handler for %s: %w", rule.Endpoint, err)
+			return nil, fmt.Errorf("failed to create fasthttp proxy handler for %s: %w", endpoint, err)
 		}
-		handlers[endpoint] = handler
-		log.Info("Registered proxy route", "endpoint", endpoint, "destination", rule.DestinationURL)
+		handlers[router] = handler
+		log.Info("Registered proxy route", "endpoint", router, "destination", destination)
 	}
 
 	handler := func(ctx *fasthttp.RequestCtx) {
@@ -89,7 +88,7 @@ func newFastHTTP(log *slog.Logger, cfg *config.ServerConfig, proxyRules []*confi
 		},
 		errCh: make(chan error, 1),
 		log:   log,
-		addr:  fmt.Sprintf("%s:%s", cfg.Host, cfg.ListenPort),
+		addr:  address,
 	}
 
 	return srv, nil

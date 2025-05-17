@@ -4,21 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"time"
 
-	"github.com/ezex-io/proxier/config"
+	"github.com/ezex-io/gopkg/logger"
 	"github.com/ezex-io/proxier/internal/proxy"
 )
 
 type httpServer struct {
 	httpServer *http.Server
 	errCh      chan error
-	log        *slog.Logger
+	log        logger.Logger
 }
 
-func NewHTTP(log *slog.Logger, serverCfg *config.ServerConfig, proxyRules []*config.ProxyRule) (Server, error) {
+func NewHTTP(log logger.Logger, address string, proxyRules map[string]string) (Server, error) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
@@ -31,19 +30,19 @@ func NewHTTP(log *slog.Logger, serverCfg *config.ServerConfig, proxyRules []*con
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	for _, rule := range proxyRules {
-		endpoint, handler, err := proxy.HTTPHandler(rule.Endpoint, rule.DestinationURL)
+	for endpoint, destination := range proxyRules {
+		router, handler, err := proxy.HTTPHandler(endpoint, destination)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create proxy handler for endpoint %s: %w", endpoint, err)
 		}
 
-		mux.Handle(endpoint+"/", handler) // Ensure `/route/` works
-		mux.Handle(endpoint, handler)     // Ensure `/route` works
-		log.Info("Registered proxy route", "endpoint", rule.Endpoint, "destination", rule.DestinationURL)
+		mux.Handle(router+"/", handler) // Ensure `/route/` works
+		mux.Handle(router, handler)     // Ensure `/route` works
+		log.Info("Registered proxy route", "endpoint", endpoint, "destination", destination)
 	}
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("%s:%s", serverCfg.Host, serverCfg.ListenPort),
+		Addr:         address,
 		Handler:      mux,
 		ReadTimeout:  10 * time.Second, // Prevent slow client attacks
 		WriteTimeout: 15 * time.Second,
