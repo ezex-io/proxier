@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -9,9 +10,10 @@ import (
 )
 
 func TestLoadFromEnv(t *testing.T) {
-	require.NoError(t, os.Setenv("EZEX_PROXIER_ADDRESS", "127.0.0.1:8081"))
-	require.NoError(t, os.Setenv("EZEX_PROXIER_ENABLE_FASTHTTP", "true"))
-	require.NoError(t, os.Setenv("EZEX_PROXIER_PROXY_RULES", "/foo|https://httpbin.org/get,/bar|https://google.com"))
+	require.NoError(t, os.Setenv("PROXIER_ADDRESS", "127.0.0.1:8081"))
+	require.NoError(t, os.Setenv("PROXIER_ENABLE_FASTHTTP", "true"))
+	require.NoError(t, os.Setenv("PROXIER_RULES", "[{\"endpoint\":\"/foo\",\"destination\":"+
+		"\"https://httpbin.org/get\"}, {\"endpoint\":\"/bar\",\"destination\":\"https://google.com\"}]"))
 
 	cfg := LoadFromEnv()
 	require.NotNil(t, cfg)
@@ -19,5 +21,9 @@ func TestLoadFromEnv(t *testing.T) {
 
 	assert.Equal(t, "127.0.0.1:8081", cfg.Address)
 	assert.Equal(t, true, cfg.EnableFastHTTP)
-	assert.Len(t, cfg.RawRules, 2)
+
+	err := json.Unmarshal([]byte(cfg.RawRules), &cfg.ParsedRules)
+	require.NoError(t, err)
+
+	assert.Len(t, cfg.ParsedRules, 2)
 }

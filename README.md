@@ -47,9 +47,9 @@ The proxy server can be configured using **environment variables**. Here's a bre
 
 | Variable Name                  | Description                                                                    | Example           |
 | ------------------------------ | ------------------------------------------------------------------------------ | ----------------- |
-| `EZEX_PROXIER_ADDRESS`         | Host and port for the proxy server to bind to                                  | `127.0.0.1:8081`  |
-| `EZEX_PROXIER_ENABLE_FASTHTTP` | Enable [`fasthttp`](https://github.com/valyala/fasthttp) instead of `net/http` | `true` or `false` |
-| `EZEX_PROXIER_PROXY_RULES`     | Comma-separated list of proxy rules in \`key                                   | `[{"endpoint":"/foo","destination":"https://httpbin.org/get"}, {"endpoint":"/bar","destination":"https://google.com"}]` |
+| `PROXIER_ADDRESS`         | Host and port for the proxy server to bind to                                  | `127.0.0.1:8081`  |
+| `PROXIER_ENABLE_FASTHTTP` | Enable [`fasthttp`](https://github.com/valyala/fasthttp) instead of `net/http` | `true` or `false` |
+| `PROXIER_RULES`     | Comma-separated list of proxy rules in \`key                                   | `[{"endpoint":"/foo","destination":"https://httpbin.org/get"}, {"endpoint":"/bar","destination":"https://google.com"}]` |
 
 * **key**: The path endpoint to intercept (e.g., `/foo`)
 * **val**: The destination URL to which the request should be proxied
@@ -57,9 +57,9 @@ The proxy server can be configured using **environment variables**. Here's a bre
 ### 🔁 Example
 
 ```env
-EZEX_PROXIER_ADDRESS=127.0.0.1:8081
-EZEX_PROXIER_ENABLE_FASTHTTP=false
-EZEX_PROXIER_PROXY_RULES=[{"endpoint":"/foo","destination":"https://httpbin.org/get"}, {"endpoint":"/bar","destination":"https://google.com"}]
+PROXIER_ADDRESS=127.0.0.1:8081
+PROXIER_ENABLE_FASTHTTP=false
+PROXIER_RULES=[{"endpoint":"/foo","destination":"https://httpbin.org/get"}, {"endpoint":"/bar","destination":"https://google.com"}]
 ```
 
 This setup creates the following proxy routes:
