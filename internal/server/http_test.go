@@ -3,38 +3,41 @@ package server
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/ezex-io/gopkg/logger"
 	"github.com/ezex-io/proxier/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var log = slog.Default()
-
-var proxyRules = []*config.ProxyRule{
-	{Endpoint: "/test", DestinationURL: "https://example.com"},
-	{Endpoint: "/mock", DestinationURL: "https://mockapi.com"},
-}
-
-var serverConfig = &config.ServerConfig{
-	Host:       "127.0.0.1",
-	ListenPort: "8080",
-}
+var (
+	log        = logger.NewSlog(nil)
+	addr       = "0.0.0.0:8080"
+	proxyRules = []*config.Rules{
+		{
+			Endpoint:    "/proxy",
+			Destination: "https://example.com/proxy",
+		},
+		{
+			Endpoint:    "/foo",
+			Destination: "https://example.com/foo",
+		},
+	}
+)
 
 func TestNewServer(t *testing.T) {
-	srv, err := NewHTTP(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, addr, proxyRules)
 
 	require.NoError(t, err, "Expected no error while creating server")
 	assert.NotNil(t, srv, "httpServer instance should not be nil")
 }
 
 func TestRootEndpoint(t *testing.T) {
-	srv, err := NewHTTP(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, addr, proxyRules)
 	require.NoError(t, err)
 
 	sv, ok := srv.(*httpServer)
@@ -53,7 +56,7 @@ func TestRootEndpoint(t *testing.T) {
 }
 
 func TestLivezEndpoint(t *testing.T) {
-	srv, err := NewHTTP(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, addr, proxyRules)
 	require.NoError(t, err)
 
 	sv, ok := srv.(*httpServer)
@@ -72,7 +75,7 @@ func TestLivezEndpoint(t *testing.T) {
 }
 
 func TestProxyRoutes(t *testing.T) {
-	srv, err := NewHTTP(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, addr, proxyRules)
 	require.NoError(t, err)
 
 	sv, ok := srv.(*httpServer)
@@ -82,7 +85,7 @@ func TestProxyRoutes(t *testing.T) {
 	defer testServer.Close()
 
 	for _, rule := range proxyRules {
-		t.Run(fmt.Sprintf("Proxy Route %s", rule.Endpoint), func(t *testing.T) {
+		t.Run(fmt.Sprintf("Proxy Route %s", rule), func(t *testing.T) {
 			resp, err := http.Get(fmt.Sprintf("%s%s", testServer.URL, rule.Endpoint))
 			require.NoError(t, err)
 			defer func() {
@@ -99,7 +102,7 @@ func TestProxyRoutes(t *testing.T) {
 }
 
 func TestServerStartStop(t *testing.T) {
-	srv, err := NewHTTP(log, serverConfig, proxyRules)
+	srv, err := NewHTTP(log, addr, proxyRules)
 	require.NoError(t, err)
 
 	go srv.Start()

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -10,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ezex-io/gopkg/env"
+	"github.com/ezex-io/gopkg/logger"
 	"github.com/ezex-io/proxier/config"
 	"github.com/ezex-io/proxier/internal/server"
 	"github.com/ezex-io/proxier/version"
@@ -17,9 +20,9 @@ import (
 )
 
 func main() {
-	log := slog.Default()
+	log := logger.NewSlog(logger.WithTextHandler(os.Stdout, slog.LevelDebug))
 
-	configPath := flag.String("config", "./config.yaml", "Path to config file")
+	envFile := flag.String("env", ".env", "Path to environment file")
 	ver := flag.Bool("version", false, "Show version and exit")
 	flag.Parse()
 
@@ -28,13 +31,17 @@ func main() {
 		os.Exit(0)
 	}
 
-	cfg, err := config.LoadConfig(*configPath)
-	if err != nil {
-		log.Error("Failed to load config", "error", err)
-		os.Exit(1)
+	if err := env.LoadEnvsFromFile(*envFile); err != nil {
+		log.Debug("Failed to load env file '%s': %v. Continuing with system environment...", *envFile, err)
 	}
 
+	cfg := config.LoadFromEnv()
+
 	log.Info("configuration loaded successfully")
+
+	if err := json.Unmarshal([]byte(cfg.RawRules), &cfg.ParsedRules); err != nil {
+		log.Fatal("Failed to unmarshal proxier rules: %v", err)
+	}
 
 	srv, err := server.New(cfg, log)
 	if err != nil {
@@ -43,7 +50,7 @@ func main() {
 	}
 
 	srv.Start()
-	log.Info("server started", "address", cfg.Server.Host+":"+cfg.Server.ListenPort)
+	log.Info("server started", "address", cfg.Address)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)

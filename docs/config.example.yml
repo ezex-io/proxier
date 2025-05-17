@@ -1,8 +1,0 @@
-server:
-  host: "0.0.0.0"
-  listen_port: "8080"
-  fast_http: true
-
-proxy:
-  - endpoint: /foo
-    destination_url: https://httpbin.org/get

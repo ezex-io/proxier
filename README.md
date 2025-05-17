@@ -23,7 +23,7 @@ go install github.com/ezex-io/proxier@latest
 ### **Using Docker**
 ```sh
 docker pull ezexio/proxier:latest
-docker run -p 8080:8080 -v $(pwd)/config.yaml:/etc/proxier/config.yaml ezexio/proxier
+docker run -p 8080:8080 -e EZEX_PROXIER_ADDRESS=127.0.0.1:8081 -e EZEX_PROXIER_PROXY_RULES=/foo|https://httpbin.org/get,/bar|https://google.com ezexio/proxier
 ```
 
 ### **Build from Source**
@@ -35,31 +35,49 @@ go build -o proxier ./cmd/proxier/main.go
 
 ---
 
-## ⚙️ Configuration (`config.yaml`)
-Define your proxy routes in a **YAML config file**:
-```yaml
-server:
-  host: "0.0.0.0"
-  listen_port: "8080"
-  fast_http: true
+Here’s an improved and clarified version of your README section to reflect the current configuration via **environment variables**, including formatting, examples, and explanation:
 
-proxy:
-  - endpoint: /foo1
-    destination_url: "https://example.com/bar1"
+---
 
-  - endpoint: /foo2
-    destination_url: "https://example.com/bar2"
+## ⚙️ Configuration
 
-  - endpoint: /foo3
-    destination_url: "https://example.com/bar3"
+The proxy server can be configured using **environment variables**. Here's a breakdown of the supported variables:
+
+### ✅ Environment Variables
+
+| Variable Name                  | Description                                                                    | Example           |
+| ------------------------------ | ------------------------------------------------------------------------------ | ----------------- |
+| `PROXIER_ADDRESS`         | Host and port for the proxy server to bind to                                  | `127.0.0.1:8081`  |
+| `PROXIER_ENABLE_FASTHTTP` | Enable [`fasthttp`](https://github.com/valyala/fasthttp) instead of `net/http` | `true` or `false` |
+| `PROXIER_RULES`     | Comma-separated list of proxy rules in \`key                                   | `[{"endpoint":"/foo","destination":"https://httpbin.org/get"}, {"endpoint":"/bar","destination":"https://google.com"}]` |
+
+* **key**: The path endpoint to intercept (e.g., `/foo`)
+* **val**: The destination URL to which the request should be proxied
+
+### 🔁 Example
+
+```env
+PROXIER_ADDRESS=127.0.0.1:8081
+PROXIER_ENABLE_FASTHTTP=false
+PROXIER_RULES=[{"endpoint":"/foo","destination":"https://httpbin.org/get"}, {"endpoint":"/bar","destination":"https://google.com"}]
 ```
+
+This setup creates the following proxy routes:
+
+| Endpoint | Proxies To                |
+| -------- | ------------------------- |
+| `/foo`   | `https://httpbin.org/get` |
+| `/bar`   | `https://google.com`      |
+
+---
+
 
 ---
 
 ## 🚀 Running the Server
 ### **Start Proxier**
 ```sh
-./proxier -config ./config.yaml
+./proxier
 ```
 
 ### **Check if Proxier is Running**
