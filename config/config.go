@@ -1,80 +1,39 @@
 package config
 
 import (
-	"errors"
-	"net/url"
-	"os"
+	"fmt"
+	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/ezex-io/gopkg/env"
 )
 
 type Config struct {
-	Server *ServerConfig `yaml:"server"`
-	Proxy  []*ProxyRule  `yaml:"proxy"`
+	Address        string
+	EnableFastHTTP bool
+	ProxyRules     []string
 }
 
-type ServerConfig struct {
-	Host       string `yaml:"host"`
-	ListenPort string `yaml:"listen_port"`
-	FastHTTP   bool   `yaml:"fast_http"`
+func LoadFromEnv() *Config {
+	return &Config{
+		Address:        env.GetEnv[string]("EZEX_PROXIER_ADDRESS", env.WithDefault("0.0.0.0:8080")),
+		EnableFastHTTP: env.GetEnv[bool]("EZEX_PROXIER_ENABLE_FASTHTTP", env.WithDefault("false")),
+		ProxyRules:     env.GetEnv[[]string]("EZEX_PROXIER_PROXY_RULES"),
+	}
 }
 
-type ProxyRule struct {
-	Endpoint       string `yaml:"endpoint"`
-	DestinationURL string `yaml:"destination_url"`
-}
-
-func LoadConfig(path string) (*Config, error) {
-	file, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	var config Config
-	if err := yaml.Unmarshal(file, &config); err != nil {
-		return nil, err
-	}
-
-	if err := config.basicCheck(); err != nil {
-		return nil, err
-	}
-
-	return &config, nil
-}
-
-func (c *Config) basicCheck() error {
-	if c.Server == nil {
-		return errors.New("server configuration is missing")
-	}
-
-	if c.Server.Host == "" {
-		return errors.New("server.host cannot be empty")
-	}
-	if c.Server.ListenPort == "" {
-		return errors.New("server.listen_port cannot be empty")
-	}
-
-	if len(c.Proxy) == 0 {
-		return errors.New("at least one proxy rule must be defined")
-	}
-
-	seenEndpoints := make(map[string]bool)
-
-	for _, rule := range c.Proxy {
-		if rule.Endpoint == "" {
-			return errors.New("proxy rule endpoint cannot be empty")
-		}
-		if rule.DestinationURL == "" {
-			return errors.New("proxy rule destination_url cannot be empty")
+func (c *Config) BasicCheck() error {
+	for _, rule := range c.ProxyRules {
+		paths := strings.Split(rule, "|")
+		if len(paths) != 2 {
+			return fmt.Errorf("invalid proxy rule: %s", rule)
 		}
 
-		if seenEndpoints[rule.Endpoint] {
-			return errors.New("duplicate proxy endpoint: " + rule.Endpoint)
+		if paths[0] == "" {
+			return fmt.Errorf("invalid proxy endpoint: %s", paths[0])
 		}
-		seenEndpoints[rule.Endpoint] = true
 
-		if _, err := url.ParseRequestURI(rule.DestinationURL); err != nil {
-			return errors.New("invalid URL in proxy rule: " + rule.DestinationURL)
+		if paths[1] == "" {
+			return fmt.Errorf("invalid proxy destination address: %s", paths[1])
 		}
 	}
 
