@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -37,6 +38,10 @@ func main() {
 	cfg := config.LoadFromEnv()
 
 	log.Info("configuration loaded successfully")
+
+	if err := json.Unmarshal([]byte(cfg.RawRules), &cfg.ParsedRules); err != nil {
+		log.Fatal("Failed to unmarshal proxier rules: %v", err)
+	}
 
 	srv, err := server.New(cfg, log)
 	if err != nil {

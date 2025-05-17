@@ -19,5 +19,5 @@ func TestLoadFromEnv(t *testing.T) {
 
 	assert.Equal(t, "127.0.0.1:8081", cfg.Address)
 	assert.Equal(t, true, cfg.EnableFastHTTP)
-	assert.Len(t, cfg.ProxyRules, 2)
+	assert.Len(t, cfg.RawRules, 2)
 }

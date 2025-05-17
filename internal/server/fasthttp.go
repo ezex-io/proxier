@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ezex-io/gopkg/logger"
+	"github.com/ezex-io/proxier/config"
 	"github.com/ezex-io/proxier/internal/proxy"
 	"github.com/valyala/fasthttp"
 )
@@ -19,16 +20,16 @@ type fastHTTPServer struct {
 	cancel context.CancelFunc
 }
 
-func newFastHTTP(log logger.Logger, address string, proxyRules map[string]string) (Server, error) {
+func newFastHTTP(log logger.Logger, address string, proxyRules []*config.Rules) (Server, error) {
 	handlers := make(map[string]fasthttp.RequestHandler)
 
-	for endpoint, destination := range proxyRules {
-		router, handler, err := proxy.FastHTTPHandler(endpoint, destination)
+	for _, rule := range proxyRules {
+		router, handler, err := proxy.FastHTTPHandler(rule.Endpoint, rule.Destination)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create fasthttp proxy handler for %s: %w", endpoint, err)
+			return nil, fmt.Errorf("failed to create fasthttp proxy handler for %s: %w", rule.Endpoint, err)
 		}
 		handlers[router] = handler
-		log.Info("Registered proxy route", "endpoint", router, "destination", destination)
+		log.Info("Registered proxy route", "endpoint", router, "destination", rule.Destination)
 	}
 
 	handler := func(ctx *fasthttp.RequestCtx) {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ezex-io/gopkg/logger"
+	"github.com/ezex-io/proxier/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,9 +17,15 @@ import (
 var (
 	log        = logger.NewSlog(nil)
 	addr       = "0.0.0.0:8080"
-	proxyRules = map[string]string{
-		"/test": "https://example.com",
-		"/mock": "https://mockapi.com",
+	proxyRules = []*config.Rules{
+		{
+			Endpoint:    "/proxy",
+			Destination: "https://example.com/proxy",
+		},
+		{
+			Endpoint:    "/foo",
+			Destination: "https://example.com/foo",
+		},
 	}
 )
 
@@ -77,9 +84,9 @@ func TestProxyRoutes(t *testing.T) {
 	testServer := httptest.NewServer(sv.httpServer.Handler)
 	defer testServer.Close()
 
-	for endpoint := range proxyRules {
-		t.Run(fmt.Sprintf("Proxy Route %s", endpoint), func(t *testing.T) {
-			resp, err := http.Get(fmt.Sprintf("%s%s", testServer.URL, endpoint))
+	for _, rule := range proxyRules {
+		t.Run(fmt.Sprintf("Proxy Route %s", rule), func(t *testing.T) {
+			resp, err := http.Get(fmt.Sprintf("%s%s", testServer.URL, rule.Endpoint))
 			require.NoError(t, err)
 			defer func() {
 				_ = resp.Body.Close()
