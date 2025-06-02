@@ -11,7 +11,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func HTTPHandler(endpoint string, destination string) (string, http.HandlerFunc, error) {
+func HTTPHandler(endpoint, destination string) (string, http.HandlerFunc, error) {
 	targetURL, err := url.Parse(destination)
 	if err != nil {
 		return "", nil, fmt.Errorf("invalid destination URL %s: %w", destination, err)
@@ -34,7 +34,7 @@ func HTTPHandler(endpoint string, destination string) (string, http.HandlerFunc,
 	return endpoint, proxy.ServeHTTP, nil
 }
 
-func FastHTTPHandler(endpoint string, destination string) (string, fasthttp.RequestHandler, error) {
+func FastHTTPHandler(endpoint, destination string) (string, fasthttp.RequestHandler, error) {
 	targetURL, err := url.Parse(destination)
 	if err != nil {
 		return "", nil, fmt.Errorf("invalid destination URL %s: %w", destination, err)

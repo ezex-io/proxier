@@ -11,10 +11,10 @@ import (
 func createTempConfig(t *testing.T, content string) string {
 	t.Helper()
 
-	tmpFile, err := os.CreateTemp("", "config_test_*.yaml")
+	tmpFile, err := os.CreateTemp(t.TempDir(), "config_test_*.yaml")
 	require.NoError(t, err, "Failed to create temp file")
 
-	_, err = tmpFile.Write([]byte(content))
+	_, err = tmpFile.WriteString(content)
 	require.NoError(t, err, "Failed to write to temp file")
 
 	err = tmpFile.Close()

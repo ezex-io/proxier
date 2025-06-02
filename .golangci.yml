@@ -20,6 +20,7 @@ linters:
     - errorlint
     - exhaustive
     - copyloopvar
+    - forbidigo
     - gci
     - gocheckcompilerdirectives
     - gocognit
@@ -41,6 +42,7 @@ linters:
     - loggercheck
     - maintidx
     - makezero
+    - mirror
     - misspell
     - musttag
     - nakedret
@@ -48,6 +50,7 @@ linters:
     - nilerr
     - nilnil
     - nlreturn
+    - noctx
     - nolintlint
     - nosprintfhostport
     - prealloc
@@ -60,6 +63,7 @@ linters:
     - stylecheck
     - tagalign
     - tagliatelle
+    - usetesting
     - testableexamples
     - thelper
     - tparallel
@@ -68,9 +72,9 @@ linters:
     - usestdlibvars
     - wastedassign
     - whitespace
-    # - wrapcheck
     - zerologlint
     - varnamelen
+    - ireturn
 
 linters-settings:
   gosimple:
@@ -80,11 +84,8 @@ linters-settings:
     enable-all-rules: true
     rules:
       - name: "exported"
-        # TODO: Enable me
-        # all exported function should have comment.
         disabled: true
 
-      # TODO: Enable me
       - name: package-comments
         disabled: true
 
@@ -130,6 +131,9 @@ linters-settings:
       - name: redefines-builtin-id
         disabled: true
 
+      - name: "var-naming"
+        disabled: true
+
       - name: unhandled-error
         arguments:
           - "fmt.Printf"
@@ -148,8 +152,13 @@ linters-settings:
       - G115
 
   stylecheck:
-    # TODO: enable ST1000 (at least one file in a package should have a package comment)
-    checks: ["all", "-ST1000"]
+    # ST1000: at least one file in a package should have a package comment
+    # ST1003: should not use underscores in package names
+    checks: ["all", "-ST1000", "-ST1003"]
+
+  staticcheck:
+    # SA1019: xyz is deprecated
+    checks: ["all", "-SA1019"]
 
   govet:
     enable-all: true
@@ -175,6 +184,16 @@ linters-settings:
         json: snake
         yaml: snake
 
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+      - unnamedResult
+      - importShadow
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+
   nestif:
     # Minimal complexity of if statements to report.
     # Default: 5
@@ -193,6 +212,8 @@ linters-settings:
       - il
       - r # reader
       - w # writer
+      - db # database
+      - tx # transaction
 
     ignore-decls:
       - wg sync.WaitGroup
@@ -200,6 +221,14 @@ linters-settings:
       - td *testData
       - ma multiaddr.Multiaddr
       - db *leveldb.DB
+
+  ireturn:
+    allow:
+      - anon
+      - error
+      - empty
+      - stdlib
+      - "github.com/ezex-io/proxier/internal/server.Server"
 
 issues:
   exclude-use-default: false
@@ -209,9 +238,11 @@ issues:
         - maintidx
         - nestif
         - gocognit
+        - forbidigo
 
   exclude:
-    - "shadow: declaration of \"err\" shadows"
-    - "builtinShadow: shadowing of predeclared identifier: min"
-    - "builtinShadow: shadowing of predeclared identifier: max"
-    - "builtinShadow: shadowing of predeclared identifier: len"
+    - 'shadow: declaration of "err" shadows'
+    - 'builtinShadow: shadowing of predeclared identifier: min'
+    - 'builtinShadow: shadowing of predeclared identifier: max'
+    - 'builtinShadow: shadowing of predeclared identifier: len'
+    

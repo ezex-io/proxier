@@ -43,7 +43,12 @@ func TestRootEndpoint(t *testing.T) {
 	testServer := httptest.NewServer(sv.httpServer.Handler)
 	defer testServer.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%s/", testServer.URL))
+	url := fmt.Sprintf("%s/", testServer.URL)
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, url, http.NoBody)
+	require.NoError(t, err)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	require.NoError(t, err)
 	defer func() {
 		_ = resp.Body.Close()
@@ -62,7 +67,12 @@ func TestLivezEndpoint(t *testing.T) {
 	testServer := httptest.NewServer(sv.httpServer.Handler)
 	defer testServer.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%s/livez", testServer.URL))
+	url := fmt.Sprintf("%s/livez", testServer.URL)
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, url, http.NoBody)
+	require.NoError(t, err)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	require.NoError(t, err)
 	defer func() {
 		_ = resp.Body.Close()
@@ -83,7 +93,12 @@ func TestProxyRoutes(t *testing.T) {
 
 	for _, rule := range proxyRules {
 		t.Run(fmt.Sprintf("Proxy Route %s", rule.Endpoint), func(t *testing.T) {
-			resp, err := http.Get(fmt.Sprintf("%s%s", testServer.URL, rule.Endpoint))
+			url := fmt.Sprintf("%s%s", testServer.URL, rule.Endpoint)
+			req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, url, http.NoBody)
+			require.NoError(t, err)
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
 			require.NoError(t, err)
 			defer func() {
 				_ = resp.Body.Close()
@@ -106,7 +121,7 @@ func TestServerStartStop(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 	srv.Stop(ctx)
 }
