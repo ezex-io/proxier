@@ -45,7 +45,12 @@ func TestProxyHandler(t *testing.T) {
 	proxyServer := httptest.NewServer(handler)
 	defer proxyServer.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%s/mockpath", proxyServer.URL))
+	url := fmt.Sprintf("%s/mockpath", proxyServer.URL)
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, url, http.NoBody)
+	require.NoError(t, err, "Creating request should not fail")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	require.NoError(t, err, "Proxy request should not fail")
 	defer func() {
 		_ = resp.Body.Close()
@@ -64,7 +69,12 @@ func TestProxyHandler_Unreachable(t *testing.T) {
 	proxyServer := httptest.NewServer(handler)
 	defer proxyServer.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%s/test", proxyServer.URL))
+	url := fmt.Sprintf("%s/test", proxyServer.URL)
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, url, http.NoBody)
+	require.NoError(t, err, "Creating request should not fail")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	defer func() {
 		_ = resp.Body.Close()
 	}()

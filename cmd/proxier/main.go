@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -24,7 +23,7 @@ func main() {
 	flag.Parse()
 
 	if *ver {
-		fmt.Println("Proxier v" + version.Version.String())
+		log.Info("Proxier version", "version", version.Version.String())
 		os.Exit(0)
 	}
 
