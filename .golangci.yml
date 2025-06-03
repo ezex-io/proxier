@@ -131,10 +131,6 @@ linters-settings:
       - name: redefines-builtin-id
         disabled: true
 
-      - name: "var-naming"
-        arguments:
-          - ["package"] # exclude package names from checking
-
       - name: unhandled-error
         arguments:
           - "fmt.Printf"
